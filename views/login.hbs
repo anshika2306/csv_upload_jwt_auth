@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome</title>
+</head>
+<style>
+    body  
+    {  
+    margin: 5px;  
+    padding: 5px;  
+    background-color:#6abadeba;  
+    font-family: 'Arial';  
+    } 
+    #heading{
+        font-family: 'Arial';
+        text-align: center;
+        font-weight: bold;
+        padding: 10px;
+    }
+    .container{
+        font-family: 'Arial';
+        text-align: center;
+        font-weight: bold;
+        padding: 10px;
+    }
+</style>
+<body>
+    <form action="/" method="POST">
+        <div id="heading">
+          <h1>Login to your account</h1>
+        </div>
+          <div class="container">
+            <label for="email"><b>Email</b></label>
+            <input type="text" placeholder="Enter Email" name="email" required>
+        
+            <label for="psw"><b>Password</b></label>
+            <input type="password" placeholder="Enter Password" name="password" required>
+        
+            <button type="submit">Login</button>
+          </div>
+          <div class="container">
+            <h3>Or</h3>
+            <a href="/signup">Create an account</a>
+          </div>
+        </form>
+</body>
+</html>
