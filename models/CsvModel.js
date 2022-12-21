@@ -7,4 +7,4 @@ const CsvModelSchema = new Schema({
     linkedin: {type: String, required: true},
 }, {timestamps: true});
 mongoose.models={};
-module.exports = mongoose.model("CsvModel", CsvModeSchema);
+module.exports = mongoose.model("CsvModel", CsvModelSchema);
