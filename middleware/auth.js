@@ -1,19 +1,19 @@
-var jwt = require("jsonwebtoken");
-const user = require('../models/User');
+const jwt = require("jsonwebtoken");
 
-module.exports = (req, res, next) => {
-    try {
-        const token = req.headers.token;
-        if (token == null || token == undefined) {
-            return res.status(401).send({
-                error: "User not found"
-            })
-        } else {
-            var result = jwt.verify(token, 'jwtsecret')
-            req.user = user.findOne({
-                email: result.email
-            })
-        }
-        next();
-    } catch (error) { }
+
+const verifyToken = (req, res, next) => {
+  const token = req.body.token;
+
+  if (!token) {
+    return res.status(403).send("A token is required for authentication");
+  }
+  try {
+    const decoded = jwt.verify(token, 'jwtsecret');
+    req.user = decoded;
+  } catch (err) {
+    return res.status(401).send("Invalid Token");
+  }
+  return next();
 };
+
+module.exports = verifyToken;

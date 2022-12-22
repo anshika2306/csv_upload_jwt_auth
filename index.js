@@ -1,16 +1,15 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
-const path = require('path');
 const user = require('./models/User');
-var bodyParser = require('body-parser');
 const multer = require('multer');
 const fs = require('fs');
-const csvModel=require('./models/CsvModel');
-
-const app = express();
+const csvModel = require('./models/CsvModel');
 const auth = require('./middleware/auth');
 var CryptoJS = require("crypto-js");
+
+const app = express();
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
@@ -35,23 +34,27 @@ mongoose
 
 app.set("view engine", "hbs");
 
-function add_data_to_database(data){
+// adding csv data to database under collection name csvModel
+function add_data_to_database(data) {
     let arr = data.split('\n')
-    for(let i = 1; i < arr.length; i++){
+    for (let i = 1; i < arr.length; i++) {
         let row = arr[i].split(',');
         console.log(row)
         let csv_data = new csvModel({
-            name:row[0],
-            phone:row[1],
-            email:row[2],
-            linkedin:row[3]
+            name: row[0],
+            phone: row[1],
+            email: row[2],
+            linkedin: row[3]
         });
-        
-        (async ()=>{ 
+
+        (async () => {
             await csv_data.save();
         })();
     }
 }
+
+
+//apis
 
 app.get("/", (req, res) => {
     res.render("login")
@@ -61,7 +64,7 @@ app.get("/signup", (req, res) => {
     res.render("signup")
 })
 
-app.get("/uploadfile", (req, res) => {
+app.get("/uploadfile", auth, (req, res) => {
     res.render("uploadfile")
 })
 
@@ -70,11 +73,11 @@ app.post("/", async (req, res, next) => {
     let user_data = await user.findOne({ email })
 
     if (user_data) {
-        console.log('anshika login');
         const bytes = CryptoJS.AES.decrypt(user_data.password, "secret123");
         let decryptedPassword = bytes.toString(CryptoJS.enc.Utf8);
         if (email == user_data.email && password == decryptedPassword) {
-            var token = jwt.sign({ email: user_data.email }, 'jwtsecret', { expiresIn: "2d" });
+            const token = jwt.sign({ email: user_data.email }, 'jwtsecret', { expiresIn: "2d" });
+            user.token = token;
             // res.status(200).json({ success: true, token })
             res.status(200).render("uploadfile");
         }
@@ -90,15 +93,15 @@ app.post("/", async (req, res, next) => {
 })
 
 app.post("/signup", async (req, res) => {
-    console.log('anshika');
     const { email, password } = req.body;
     let existingUser = await user.findOne({ email });
     if (!existingUser) {
         let u = new user({ email, password: CryptoJS.AES.encrypt(req.body.password, "secret123").toString() })
-        await u.save()
+        
         var token = jwt.sign({ email: u.email }, 'jwtsecret', { expiresIn: "2d" });
         //res.status(200).json({ success: "success" })
-
+        u.token = token;
+        await u.save();
         res.render("login");
     }
     else {
@@ -106,11 +109,11 @@ app.post("/signup", async (req, res) => {
     }
 })
 
-app.post('/uploadfile', upload.single('file'), async function (req, res, next) {  
+app.post('/uploadfile', upload.single('file'), async function (req, res, next) {
     let data = fs.readFileSync(req.file.path).toString();
     add_data_to_database(data);
-    res.status(200).send({'message' : "file uploaded"});
-  })
+    res.status(200).send({ 'message': "file uploaded" });
+})
 
 let PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
